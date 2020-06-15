@@ -1,9 +1,6 @@
 function createLead(data) {
 
     //NEW CUSTOMER RECORD
-    nlapiLogExecution('DEBUG', 'data', data);
-    //data = JSON.parse(data);
-    //nlapiLogExecution('DEBUG', 'data', data);
     var dataOut = '{"dataOut":[';
 
     for (var fieldname in data) {
@@ -25,9 +22,9 @@ function createLead(data) {
                     } else {
                         customerRecord.setFieldValue('leadsource', 99417); //Inbound - Web
                     }
-                } else if (data[fieldname][x]['leadsource']  == 'Shopify') {
+                } else if (data[fieldname][x]['leadsource'] == 'Shopify') {
                     customerRecord.setFieldValue('leadsource', 246306); //Shopify
-                } else if (data[fieldname][x]['leadsource']  == 'Airush') {
+                } else if (data[fieldname][x]['leadsource'] == 'Airush') {
                     customerRecord.setFieldValue('leadsource', 246307); //Airush
                 }
                 customerRecord.setFieldValue('entitystatus', 57); //Suspect - Hot Lead
@@ -36,12 +33,12 @@ function createLead(data) {
                 customerRecord.setFieldValue('custentity_industry_category', 19); //Other services
                 customerRecord.setFieldValue('custentity_date_lead_entered', getDate());
                 customerRecord.setFieldValue('custentity_lead_entered_by', 585236); //Portal
-                customerRecord.setFieldValue('custentity_frequency', data[fieldname][x]['frequency'] );
+                customerRecord.setFieldValue('custentity_frequency', data[fieldname][x]['frequency']);
 
                 //ADDRESS
                 customerRecord.selectNewLineItem('addressbook');
                 customerRecord.setCurrentLineItemValue('addressbook', 'country', 'AU');
-                customerRecord.setCurrentLineItemValue('addressbook', 'addressee', data[fieldname][x]['businessName'] );
+                customerRecord.setCurrentLineItemValue('addressbook', 'addressee', data[fieldname][x]['businessName']);
                 customerRecord.setCurrentLineItemValue('addressbook', 'addr1', data[fieldname][x]['addr1']);
                 customerRecord.setCurrentLineItemValue('addressbook', 'addr2', data[fieldname][x]['addr2']);
                 customerRecord.setCurrentLineItemValue('addressbook', 'city', data[fieldname][x]['city']);
@@ -83,7 +80,7 @@ function createLead(data) {
 
                 var from = 112209; //MailPlus team
                 var to;
-                var cc = ['luke.forbes@mailplus.com.au', 'belinda.urbani@mailplus.com.au', 'ankith.ravindran@mailplus.com.au','gaelle.greiveldinger@mailplus.com.au'];
+                var cc = ['luke.forbes@mailplus.com.au', 'belinda.urbani@mailplus.com.au', 'ankith.ravindran@mailplus.com.au', 'gaelle.greiveldinger@mailplus.com.au'];
                 var subject = 'Sales HOT Lead - ' + entity_id + ' ' + customer_name + '';
                 var cust_id_link = 'https://1048144.app.netsuite.com/app/common/entity/custjob.nl?id=' + customerRecordId;
                 var body = 'New sales record has been created. \n A HOT Lead has been entered into the System. Please respond in an hour. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
@@ -102,13 +99,13 @@ function createLead(data) {
                             to = ['lee.russell@mailplus.com.au']
                             break;
                         case 'VIC':
-                            salesRep = 78353; //David Towey
-                            to = ['david.towey@mailplus.com.au']
+                            salesRep = 78353; //David Gdanski
+                            to = ['david.gdanski@mailplus.com.au']
                             break;
                         default:
                             salesRep = 668712; //Belinda Urbani
                             to = ['belinda.urbani@mailplus.com.au'];
-                            cc = ['luke.forbes@mailplus.com.au', 'ankith.ravindran@mailplus.com.au'];
+                            cc = ['luke.forbes@mailplus.com.au', 'ankith.ravindran@mailplus.com.au', 'gaelle.greiveldinger@mailplus.com.au'];
                     }
                     nlapiSendEmail(from, to, subject, body, cc);
                     salesRecord.setFieldValue('custrecord_sales_customer', customerRecordId);
@@ -122,28 +119,25 @@ function createLead(data) {
                 }
                 dataOut += '{"ns_id":"' + customerRecordId + '"},';
 
-/*                for (var insidefieldname in data[fieldname][x]) {
-                    nlapiLogExecution('DEBUG', 'insidefieldname', insidefieldname); //KEY
-                    nlapiLogExecution('DEBUG', 'data[fieldname][x][insidefieldname]', data[fieldname][x][insidefieldname]) //VALUE
-                }*/
+                /*                for (var insidefieldname in data[fieldname][x]) {
+                                    nlapiLogExecution('DEBUG', 'insidefieldname', insidefieldname); //KEY
+                                    nlapiLogExecution('DEBUG', 'data[fieldname][x][insidefieldname]', data[fieldname][x][insidefieldname]) //VALUE
+                                }*/
             }
 
         }
     }
-    nlapiLogExecution('DEBUG', 'dataOut', dataOut);
     dataOut = dataOut.substring(0, dataOut.length - 1);
     dataOut += ']}';
-    nlapiLogExecution('DEBUG', 'dataOut', dataOut);
     dataOut = JSON.parse(dataOut);
     return dataOut
 }
 
 function getDate() {
     var date = new Date();
-    nlapiLogExecution('DEBUG', 'date', date);
-    //date = date.tz('Australia/Sydney').format();
-    //nlapiLogExecution('DEBUG', 'date', date);
+    if (date.getHours() > 6) {
+        date = nlapiAddDays(date, 1);
+    }
     date = nlapiDateToString(date);
-    //nlapiLogExecution('DEBUG', 'date', date);
     return date;
 }
