@@ -14,7 +14,7 @@ function createLead(data) {
                 customerRecord.setFieldValue('companyname', data[fieldname][x]['businessName']);
                 customerRecord.setFieldValue('custentity_email_service', data[fieldname][x]['email']);
                 customerRecord.setFieldValue('phone', data[fieldname][x]['phone']);
-                if (data[fieldname][x]['leadsource'] == 'Portal') {
+                if (data[fieldname][x]['leadsource'].toLowerCase() == 'portal') {
                     var quadient = data[fieldname][x]['businessName'].substring(0, 10);
                     nlapiLogExecution('DEBUG', 'quadient', quadient);
                     if (quadient == 'Quadient -') {
@@ -22,9 +22,9 @@ function createLead(data) {
                     } else {
                         customerRecord.setFieldValue('leadsource', 99417); //Inbound - Web
                     }
-                } else if (data[fieldname][x]['leadsource'] == 'Shopify') {
+                } else if (data[fieldname][x]['leadsource'].toLowerCase() == 'shopify') {
                     customerRecord.setFieldValue('leadsource', 246306); //Shopify
-                } else if (data[fieldname][x]['leadsource'] == 'Airush') {
+                } else if (data[fieldname][x]['leadsource'].toLowerCase() == 'airush') {
                     customerRecord.setFieldValue('leadsource', 246307); //Airush
                 }
                 customerRecord.setFieldValue('entitystatus', 57); //Suspect - Hot Lead
@@ -42,7 +42,7 @@ function createLead(data) {
                 customerRecord.setCurrentLineItemValue('addressbook', 'addr1', data[fieldname][x]['addr1']);
                 customerRecord.setCurrentLineItemValue('addressbook', 'addr2', data[fieldname][x]['addr2']);
                 customerRecord.setCurrentLineItemValue('addressbook', 'city', data[fieldname][x]['city']);
-                customerRecord.setCurrentLineItemValue('addressbook', 'state', data[fieldname][x]['state']);
+                customerRecord.setCurrentLineItemValue('addressbook', 'state', data[fieldname][x]['state'].toUpperCase());
                 customerRecord.setCurrentLineItemValue('addressbook', 'zip', data[fieldname][x]['zip']);
                 customerRecord.commitLineItem('addressbook');
 
@@ -80,12 +80,12 @@ function createLead(data) {
 
                 var from = 112209; //MailPlus team
                 var to;
-                var cc = ['luke.forbes@mailplus.com.au', 'belinda.urbani@mailplus.com.au', 'ankith.ravindran@mailplus.com.au', 'gaelle.greiveldinger@mailplus.com.au'];
+                var cc = ['luke.forbes@mailplus.com.au', 'belinda.urbani@mailplus.com.au', 'ankith.ravindran@mailplus.com.au'];
                 var subject = 'Sales HOT Lead - ' + entity_id + ' ' + customer_name + '';
                 var cust_id_link = 'https://1048144.app.netsuite.com/app/common/entity/custjob.nl?id=' + customerRecordId;
                 var body = 'New sales record has been created. \n A HOT Lead has been entered into the System. Please respond in an hour. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
 
-                if (data[fieldname][x]['state'] == 'NSW') {
+                if (data[fieldname][x]['state'].toUpperCase() == 'NSW') {
                     to = ['niz.ali@mailplus.com.au', 'kerina.helliwell@mailplus.com.au'];
                     //to = ['gaelle.greiveldinger@mailplus.com.au'];
                     body = 'Dear Kerina & Niz, \n \nA HOT Lead has been entered into the System. Please create a Sales Record to assign it to yourself. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
@@ -93,7 +93,7 @@ function createLead(data) {
                 } else {
                     var salesRecord = nlapiCreateRecord('customrecord_sales');
                     var salesRep;
-                    switch (data[fieldname][x]['state']) {
+                    switch (data[fieldname][x]['state'].toUpperCase()) {
                         case 'QLD':
                             salesRep = 668711; //Lee Russell
                             to = ['lee.russell@mailplus.com.au']
@@ -105,7 +105,7 @@ function createLead(data) {
                         default:
                             salesRep = 668712; //Belinda Urbani
                             to = ['belinda.urbani@mailplus.com.au'];
-                            cc = ['luke.forbes@mailplus.com.au', 'ankith.ravindran@mailplus.com.au', 'gaelle.greiveldinger@mailplus.com.au'];
+                            cc = ['luke.forbes@mailplus.com.au', 'ankith.ravindran@mailplus.com.au'];
                     }
                     nlapiSendEmail(from, to, subject, body, cc);
                     salesRecord.setFieldValue('custrecord_sales_customer', customerRecordId);
