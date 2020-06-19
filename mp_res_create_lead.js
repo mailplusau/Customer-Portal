@@ -42,7 +42,7 @@ function createLead(data) {
                 customerRecord.setCurrentLineItemValue('addressbook', 'addr1', data[fieldname][x]['addr1']);
                 customerRecord.setCurrentLineItemValue('addressbook', 'addr2', data[fieldname][x]['addr2']);
                 customerRecord.setCurrentLineItemValue('addressbook', 'city', data[fieldname][x]['city']);
-                customerRecord.setCurrentLineItemValue('addressbook', 'state', data[fieldname][x]['state'].toUpperCase());
+                customerRecord.setCurrentLineItemValue('addressbook', 'state', formatStateName(data[fieldname][x]['state']));
                 customerRecord.setCurrentLineItemValue('addressbook', 'zip', data[fieldname][x]['zip']);
                 customerRecord.commitLineItem('addressbook');
 
@@ -85,7 +85,7 @@ function createLead(data) {
                 var cust_id_link = 'https://1048144.app.netsuite.com/app/common/entity/custjob.nl?id=' + customerRecordId;
                 var body = 'New sales record has been created. \n A HOT Lead has been entered into the System. Please respond in an hour. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
 
-                if (data[fieldname][x]['state'].toUpperCase() == 'NSW') {
+                if (formatStateName(data[fieldname][x]['state']) == 'NSW') {
                     to = ['niz.ali@mailplus.com.au', 'kerina.helliwell@mailplus.com.au'];
                     //to = ['gaelle.greiveldinger@mailplus.com.au'];
                     body = 'Dear Kerina & Niz, \n \nA HOT Lead has been entered into the System. Please create a Sales Record to assign it to yourself. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
@@ -93,13 +93,13 @@ function createLead(data) {
                 } else {
                     var salesRecord = nlapiCreateRecord('customrecord_sales');
                     var salesRep;
-                    switch (data[fieldname][x]['state'].toUpperCase()) {
+                    switch (formatStateName(data[fieldname][x]['state'])) {
                         case 'QLD':
                             salesRep = 668711; //Lee Russell
                             to = ['lee.russell@mailplus.com.au']
                             break;
                         case 'VIC':
-                            salesRep = 78353; //David Gdanski
+                            salesRep = 690145; //David Gdanski
                             to = ['david.gdanski@mailplus.com.au']
                             break;
                         default:
@@ -131,6 +131,38 @@ function createLead(data) {
     dataOut += ']}';
     dataOut = JSON.parse(dataOut);
     return dataOut
+}
+
+function formatStateName(stateName) {
+    stateName = stateName.toLowerCase();
+    nlapiLogExecution('DEBUG', 'stateName', stateName);
+    switch (stateName) {
+        case 'new south wales':
+            stateName = 'nsw';
+            break;
+        case 'victoria':
+            stateName = 'vic';
+            break;
+        case 'queensland':
+            stateName = 'qld';
+            break;
+        case 'northern territory':
+            stateName = 'nt';
+            break;
+        case 'south australia':
+            stateName = 'sa';
+            break;
+        case 'western australia':
+            stateName = 'wa';
+            break;
+        case 'australian capital territory':
+            stateName = 'act';
+            break;
+        case 'tasmania':
+            stateName = 'tas';
+            break;
+    }
+    return stateName.toUpperCase();
 }
 
 function getDate() {
