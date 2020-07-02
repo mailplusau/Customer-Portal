@@ -5,11 +5,14 @@ function createLead(data) {
 
     for (var fieldname in data) {
         if (data.hasOwnProperty(fieldname)) {
-            nlapiLogExecution('DEBUG', 'fieldname', fieldname);
-            nlapiLogExecution('DEBUG', 'data[fieldname].length', data[fieldname].length);
             for (var x = 0; x < data[fieldname].length; x++) {
                 nlapiLogExecution('DEBUG', 'data[fieldname][x][businessName]', data[fieldname][x]['businessName']);
-                if (isNullorEmpty(data[fieldname][x]['city']) || isNullorEmpty(data[fieldname][x]['state']) || isNullorEmpty(data[fieldname][x]['zip'] || isNaN(data[fieldname][x]['city'])) || isNaN(data[fieldname][x]['state']) || isNaN(data[fieldname][x]['zip'])) {
+                nlapiLogExecution('DEBUG', 'data[fieldname][x][city]', data[fieldname][x]['city']);
+                nlapiLogExecution('DEBUG', 'data[fieldname][x][state]', data[fieldname][x]['state']);
+                nlapiLogExecution('DEBUG', 'data[fieldname][x][zip]', data[fieldname][x]['zip']);
+                nlapiLogExecution('DEBUG', 'data[fieldname][x][addr1]', data[fieldname][x]['addr1']);
+                nlapiLogExecution('DEBUG', 'data[fieldname][x][addr2]', data[fieldname][x]['addr2']);
+                if (isNullorEmpty(data[fieldname][x]['city']) || isNullorEmpty(data[fieldname][x]['state']) || isNullorEmpty(data[fieldname][x]['zip']) || data[fieldname][x]['city'] == "n/a" || data[fieldname][x]['state'] == "n/a" || data[fieldname][x]['zip'] == "n/a") {
                     dataOut += '{"ns_id":"ADDRESS ERROR - Empty city, state and/or zip. The lead was not created."},';
                 } else { //lead only created if the address is correct
                     var customerRecord = nlapiCreateRecord('lead');
@@ -41,13 +44,53 @@ function createLead(data) {
                     customerRecord.selectNewLineItem('addressbook');
                     customerRecord.setCurrentLineItemValue('addressbook', 'country', 'AU');
                     customerRecord.setCurrentLineItemValue('addressbook', 'addressee', data[fieldname][x]['businessName']);
-                    customerRecord.setCurrentLineItemValue('addressbook', 'addr1', data[fieldname][x]['addr1']);
-                    customerRecord.setCurrentLineItemValue('addressbook', 'addr2', data[fieldname][x]['addr2']);
+                    customerRecord.setCurrentLineItemValue('addressbook', 'addr2', data[fieldname][x]['addr1']); //reversed because comes the other way from the portal
+                    if (data[fieldname][x]['addr2'] != "n/a" && data[fieldname][x]['addr2'] != "N/A") {
+                        customerRecord.setCurrentLineItemValue('addressbook', 'addr1', data[fieldname][x]['addr2']);
+                    }
                     customerRecord.setCurrentLineItemValue('addressbook', 'city', data[fieldname][x]['city']);
                     customerRecord.setCurrentLineItemValue('addressbook', 'state', formatStateName(data[fieldname][x]['state']));
                     customerRecord.setCurrentLineItemValue('addressbook', 'zip', data[fieldname][x]['zip']);
+
+                    var fullAddress = '' + data[fieldname][x]['addr1'] + ',' + data[fieldname][x]['city'] + ',' + formatStateName(data[fieldname][x]['state']) + '';
+                    nlapiLogExecution('DEBUG', 'fullAddress', fullAddress);
+
+                    var result = nlapiRequestURL('https://maps.googleapis.com/maps/api/geocode/json?address=' + fullAddress + '&key=AIzaSyA92XGDo8rx11izPYT7z2L-YPMMJ6Ih1s0&libraries=places');
+
+                    var resultJSON = JSON.parse(result.getBody());
+
+                    var subrecord = customerRecord.editCurrentLineItemSubrecord('addressbook', 'addressbookaddress');
+
+                    var lat = resultJSON.results[0].geometry.location.lat;
+                    var lng = resultJSON.results[0].geometry.location.lng;
+                    //var lat = data[fieldname][x]['lat'];
+                    //var lng = data[fieldname][x]['lng'];
+                    nlapiLogExecution('DEBUG', 'lat', lat);
+                    nlapiLogExecution('DEBUG', 'lng', lng);
+                    //subrecord.setFieldValue('custrecord_address_lat', lat);
+                    //subrecord.setFieldValue('custrecord_address_lon', lng);
+                    customerRecord.setCurrentLineItemValue('addressbook', 'custrecord_address_lat', lat);
+                    customerRecord.setCurrentLineItemValue('addressbook', 'custrecord_address_lon', lng);
+                    //subrecord.commit();
                     customerRecord.commitLineItem('addressbook');
 
+                    var territory = getTerritory(lat, lng);
+                    nlapiLogExecution('DEBUG', 'territory', territory);
+                    nlapiLogExecution('DEBUG', 'territory.length', territory.length);
+                    if (territory.length == 1) {
+                        var searched_zee = nlapiLoadSearch('partner', 'customsearch_job_inv_process_zee');
+                        var newFilters = new Array();
+                        newFilters[newFilters.length] = new nlobjSearchFilter('entityid', null, 'is', territory[0]);
+                        searched_zee.addFilters(newFilters);
+                        var zeeResults = searched_zee.runSearch();
+                        var zeeResult = zeeResults.getResults(0, 1);
+                        nlapiLogExecution('DEBUG', 'zeeResult.length', zeeResult.length);
+                        if (zeeResult.length != 0) {
+                            var zee_id = zeeResult[0].getValue('internalid');
+                            nlapiLogExecution('DEBUG', 'zee_id', zee_id);
+                            customerRecord.setFieldValue('partner', zee_id);
+                        }
+                    }
                     var customerRecordId = nlapiSubmitRecord(customerRecord);
 
                     //CONTACT
@@ -91,7 +134,7 @@ function createLead(data) {
                         to = ['niz.ali@mailplus.com.au', 'kerina.helliwell@mailplus.com.au'];
                         //to = ['gaelle.greiveldinger@mailplus.com.au'];
                         body = 'Dear Kerina & Niz, \n \nA HOT Lead has been entered into the System. Please create a Sales Record to assign it to yourself. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
-                        nlapiSendEmail(from, to, subject, body, cc);
+                        //nlapiSendEmail(from, to, subject, body, cc);
                     } else {
                         var salesRecord = nlapiCreateRecord('customrecord_sales');
                         var salesRep;
@@ -109,9 +152,9 @@ function createLead(data) {
                                 to = ['belinda.urbani@mailplus.com.au'];
                                 cc = ['luke.forbes@mailplus.com.au', 'ankith.ravindran@mailplus.com.au'];
                         }
-                        nlapiSendEmail(from, to, subject, body, cc);
+                        //nlapiSendEmail(from, to, subject, body, cc);
                         salesRecord.setFieldValue('custrecord_sales_customer', customerRecordId);
-                        salesRecord.setFieldValue('custrecord_sales_campaign', 62);
+                        salesRecord.setFieldValue('custrecord_sales_campaign', 62); //Field Sales
                         salesRecord.setFieldValue('custrecord_sales_assigned', salesRep);
                         salesRecord.setFieldValue('custrecord_sales_outcome', 5);
                         salesRecord.setFieldValue('custrecord_sales_callbackdate', getDate());
@@ -121,10 +164,7 @@ function createLead(data) {
                     }
                     dataOut += '{"ns_id":"' + customerRecordId + '"},';
                 }
-                /*                for (var insidefieldname in data[fieldname][x]) {
-                                    nlapiLogExecution('DEBUG', 'insidefieldname', insidefieldname); //KEY
-                                    nlapiLogExecution('DEBUG', 'data[fieldname][x][insidefieldname]', data[fieldname][x][insidefieldname]) //VALUE
-                                }*/
+
             }
 
         }
@@ -167,6 +207,67 @@ function formatStateName(stateName) {
     }
     return stateName.toUpperCase();
 }
+
+function geocodeAddress(address) {
+    var position;
+    var geocode = new google.maps.Geocoder();
+    geocoder.geocode({
+        'address': address
+    }, function(results, status) {
+        if (status === 'OK') {
+            position = results[0].geometry.location;
+        } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+        }
+    });
+    return position
+}
+
+function getTerritory(lat, lng) {
+    var territory = [];
+    var file = nlapiLoadFile(3771516);
+    var data = file.getValue();
+    nlapiLogExecution('DEBUG', 'data', data);
+    data = JSON.parse(data);
+    var territories = data.features;
+    for (k = 0; k < territories.length; k++) {
+        var polygon_array = territories[k].geometry.coordinates;
+        var polygon = [];
+        if (polygon_array.length > 1) {
+            for (i = 0; i < polygon_array.length; i++) {
+                polygon = polygon.concat(polygon_array[i][0]);
+            }
+        } else {
+            polygon = polygon_array[0];
+        }
+        var isInTerritory = inside([lng, lat], polygon);
+        if (isInTerritory == true) {
+            territory[territory.length] = territories[k].properties.Name;
+        }
+    }
+    return territory;
+}
+
+function inside(point, polygon) {
+    // ray-casting algorithm based on
+    // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+
+    var x = point[0],
+        y = point[1];
+    var inside = false;
+    for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        var xi = polygon[i][0],
+            yi = polygon[i][1];
+        var xj = polygon[j][0],
+            yj = polygon[j][1];
+
+        var intersect = ((yi > y) != (yj > y)) &&
+            (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+
+    return inside;
+};
 
 function getDate() {
     var date = new Date();
