@@ -134,7 +134,7 @@ function createLead(data) {
                         to = ['niz.ali@mailplus.com.au', 'kerina.helliwell@mailplus.com.au'];
                         //to = ['gaelle.greiveldinger@mailplus.com.au'];
                         body = 'Dear Kerina & Niz, \n \nA HOT Lead has been entered into the System. Please create a Sales Record to assign it to yourself. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
-                        //nlapiSendEmail(from, to, subject, body, cc);
+                        nlapiSendEmail(from, to, subject, body, cc);
                     } else {
                         var salesRecord = nlapiCreateRecord('customrecord_sales');
                         var salesRep;
@@ -152,7 +152,7 @@ function createLead(data) {
                                 to = ['belinda.urbani@mailplus.com.au'];
                                 cc = ['luke.forbes@mailplus.com.au', 'ankith.ravindran@mailplus.com.au'];
                         }
-                        //nlapiSendEmail(from, to, subject, body, cc);
+                        nlapiSendEmail(from, to, subject, body, cc);
                         salesRecord.setFieldValue('custrecord_sales_customer', customerRecordId);
                         salesRecord.setFieldValue('custrecord_sales_campaign', 62); //Field Sales
                         salesRecord.setFieldValue('custrecord_sales_assigned', salesRep);
@@ -225,9 +225,9 @@ function geocodeAddress(address) {
 
 function getTerritory(lat, lng) {
     var territory = [];
-    var file = nlapiLoadFile(3771516);
+    var file = nlapiLoadFile(3772482);
     var data = file.getValue();
-    nlapiLogExecution('DEBUG', 'data', data);
+    //nlapiLogExecution('DEBUG', 'data', data);
     data = JSON.parse(data);
     var territories = data.features;
     for (k = 0; k < territories.length; k++) {
@@ -242,7 +242,7 @@ function getTerritory(lat, lng) {
         }
         var isInTerritory = inside([lng, lat], polygon);
         if (isInTerritory == true) {
-            territory[territory.length] = territories[k].properties.Name;
+            territory[territory.length] = territories[k].properties.name;
         }
     }
     return territory;
