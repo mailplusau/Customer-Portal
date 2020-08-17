@@ -125,7 +125,7 @@ function createLead(data) {
 
                     var from = 112209; //MailPlus team
                     var to;
-                    var cc = ['luke.forbes@mailplus.com.au', 'belinda.urbani@mailplus.com.au', 'ankith.ravindran@mailplus.com.au'];
+                    var cc = ['luke.forbes@mailplus.com.au', 'belinda.urbani@mailplus.com.au'];
                     var subject = 'Sales HOT Lead - ' + entity_id + ' ' + customer_name + '';
                     var cust_id_link = 'https://1048144.app.netsuite.com/app/common/entity/custjob.nl?id=' + customerRecordId;
                     var body = 'New sales record has been created. \n A HOT Lead has been entered into the System. Please respond in an hour. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
@@ -150,7 +150,7 @@ function createLead(data) {
                             default:
                                 salesRep = 668712; //Belinda Urbani
                                 to = ['belinda.urbani@mailplus.com.au'];
-                                cc = ['luke.forbes@mailplus.com.au', 'ankith.ravindran@mailplus.com.au'];
+                                cc = ['luke.forbes@mailplus.com.au'];
                         }
                         nlapiSendEmail(from, to, subject, body, cc);
                         salesRecord.setFieldValue('custrecord_sales_customer', customerRecordId);
