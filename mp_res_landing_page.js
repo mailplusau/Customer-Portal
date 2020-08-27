@@ -7,7 +7,7 @@
  * Description: Create Leads on NetSuite coming from the Landing Page on Unbounce.       
  * 
  * @Last Modified by:   Ankith
- * @Last Modified time: 2020-08-27 12:34:55
+ * @Last Modified time: 2020-08-28 09:51:14
  *
  */
 
@@ -66,7 +66,7 @@ function createLead(data) {
             customerRecord.setFieldValue('custentity_form_mpex_usage_per_week', 1);
         } else if (parsedMainData['average_weekly_shipments'] == '21-100 per week') {
             customerRecord.setFieldValue('custentity_form_mpex_usage_per_week', 2);
-        } else if (parsedMainData['average_weekly_shipments'] == '100+ per week') {
+        } else if (parsedMainData['average_weekly_shipments'] == '100  per week') {
             customerRecord.setFieldValue('custentity_form_mpex_usage_per_week', 3);
         }
 
@@ -99,8 +99,10 @@ function createLead(data) {
         var cust_id_link = 'https://1048144.app.netsuite.com/app/common/entity/custjob.nl?id=' + customerRecordId;
         var body = 'New sales record has been created. \n A HOT Lead has been entered into the System. Please respond in an hour. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
 
+        var postcode = parseInt(parsedMainData['postcode']);
+
         //ACT & NSW Postcodes
-        if (parsedMainData['postcode'].startsWith("2") == true) {
+        if (postcode >= 2000 && postcode <= 2999) {
             var postcode = parseInt(parsedMainData['postcode']);
             //ACT Post Codes
             if ((postcode >= 2600 && postcode <= 2618) || (postcode >= 2900 && postcode <= 2920)) {
@@ -126,22 +128,24 @@ function createLead(data) {
                 nlapiSendEmail(from, to, subject, body, cc);
             }
 
-        } else {
+        } else { //Everything else
+
+            //Create Sales Record
             var salesRecord = nlapiCreateRecord('customrecord_sales');
-            if (parsedMainData['postcode'].startsWith("3") == true) { //VIC Postcodes
+            if (postcode >= 3000 && postcode <= 3999) { //VIC Postcodes
                 var salesRep = 690145; //David Gdanski
                 to = ['david.gdanski@mailplus.com.au']
-            } else if (parsedMainData['postcode'].startsWith("4") == true || parsedMainData['postcode'].startsWith("0") == true) { //QLD & NT Postcodes
+            } else if ((postcode >= 4000 && postcode <= 4999) || (postcode >= 800 && postcode <= 999)) { //QLD & NT Postcodes
                 var salesRep = 668711; //Lee Russell
                 to = ['lee.russell@mailplus.com.au']
-            } else if (parsedMainData['postcode'].startsWith("7") == true) { //TAS Postcodes
+            } else if (postcode >= 7000 && postcode <= 7999) { //TAS Postcodes
                 var salesRep = 765724; //Niz Ali
                 to = ['niz.ali@mailplus.com.au']
             } else { //Everything else
                 var salesRep = 668712; //Belinda Urbani
                 to = ['belinda.urbani@mailplus.com.au'];
-                cc = ['luke.forbes@mailplus.com.au'];
             }
+
             nlapiSendEmail(from, to, subject, body, cc);
 
             salesRecord.setFieldValue('custrecord_sales_customer', customerRecordId);
@@ -153,15 +157,31 @@ function createLead(data) {
             salesRecord.setFieldValue('custrecord_sales_callbacktime', nlapiDateToString(date, 'timeofday'));
             nlapiSubmitRecord(salesRecord);
         }
+
+         //Send Email to Customer who filled out the Landing Page Form
+        var url = 'https://1048144.extforms.netsuite.com/app/site/hosting/scriptlet.nl?script=395&deploy=1&compid=1048144&h=6d4293eecb3cb3f4353e&rectype=customer&template=';
+        var template_id = 94;
+        var newLeadEmailTemplateRecord = nlapiLoadRecord('customrecord_camp_comm_template', template_id);
+        var templateSubject = newLeadEmailTemplateRecord.getFieldValue('custrecord_camp_comm_subject');
+        var emailAttach = new Object();
+        emailAttach['entity'] = customerRecordId;
+
+        url += template_id + '&recid=' + customerRecordId + '&salesrep=' + salesRep + '&dear=' + parsedMainData['full_name'] + '&contactid=' + null + '&userid=' + encodeURIComponent(nlapiGetContext().getUser());;
+        urlCall = nlapiRequestURL(url);
+        var emailHtml = urlCall.getBody();
+
+        nlapiSendEmail(112209, parsedMainData['email_address'], templateSubject, emailHtml, null, null, emailAttach)
     }
+
+
 
     dataOut += '{"ns_id":"' + customerRecordId + '"},';
 
     dataOut = dataOut.substring(0, dataOut.length - 1);
     dataOut += ']}';
     nlapiLogExecution('DEBUG', 'dataOut', dataOut);
-    dataOut = JSON.parse(dataOut);
-    return dataOut
+    // dataOut = JSON.parse(dataOut);
+    return dataOut;
 
 }
 

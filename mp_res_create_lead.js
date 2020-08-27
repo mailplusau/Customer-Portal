@@ -147,6 +147,10 @@ function createLead(data) {
                                 salesRep = 690145; //David Gdanski
                                 to = ['david.gdanski@mailplus.com.au']
                                 break;
+                            case 'TAS':
+                                salesRep = 765724; //Niz Ali
+                                to = ['niz.ali@mailplus.com.au']
+                                break;
                             default:
                                 salesRep = 668712; //Belinda Urbani
                                 to = ['belinda.urbani@mailplus.com.au'];
@@ -163,6 +167,20 @@ function createLead(data) {
                         nlapiSubmitRecord(salesRecord);
                     }
                     dataOut += '{"ns_id":"' + customerRecordId + '"},';
+
+                    //Send Email to Customer who filled out the Sign Up Form
+                    var url = 'https://1048144.extforms.netsuite.com/app/site/hosting/scriptlet.nl?script=395&deploy=1&compid=1048144&h=6d4293eecb3cb3f4353e&rectype=customer&template=';
+                    var template_id = 94;
+                    var newLeadEmailTemplateRecord = nlapiLoadRecord('customrecord_camp_comm_template', template_id);
+                    var templateSubject = newLeadEmailTemplateRecord.getFieldValue('custrecord_camp_comm_subject');
+                    var emailAttach = new Object();
+                    emailAttach['entity'] = customerRecordId;
+
+                    url += template_id + '&recid=' + customerRecordId + '&salesrep=' + salesRep + '&dear=' + data[fieldname][x]['firstName'] + '&contactid=' + null + '&userid=' + encodeURIComponent(nlapiGetContext().getUser());;
+                    urlCall = nlapiRequestURL(url);
+                    var emailHtml = urlCall.getBody();
+
+                    nlapiSendEmail(112209, data[fieldname][x]['email'], templateSubject, emailHtml, null, null, emailAttach)
                 }
 
             }
