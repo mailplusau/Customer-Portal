@@ -6,8 +6,8 @@
  *
  * Description: Create Leads on NetSuite coming from the Landing Page on Unbounce.       
  * 
- * @Last Modified by:   Ankith
- * @Last Modified time: 2020-08-28 09:51:14
+ * @Last Modified by:   ankit
+ * @Last Modified time: 2020-09-08 08:42:31
  *
  */
 
@@ -39,7 +39,7 @@ function createLead(data) {
     var dataOut = '{"dataOut":[';
 
     //If Post code is empty, do not create a record on NetSuite
-    if (isNullorEmpty(parsedMainData['average_weekly_shipments'])) {
+    if (isNullorEmpty(parsedMainData['postcode'])) {
         dataOut += '{"ns_id":"ADDRESS ERROR - Empty Post Code"},';
     } else {
 
@@ -69,6 +69,28 @@ function createLead(data) {
         } else if (parsedMainData['average_weekly_shipments'] == '100  per week') {
             customerRecord.setFieldValue('custentity_form_mpex_usage_per_week', 3);
         }
+
+        if (parsedMainData['how_did_you_hear_about_us'] == 'Social Media (e.g. Facebook)') {
+            customerRecord.setFieldValue('custentity_how_did_you_hear_about_us', 1);
+        } else if (parsedMainData['how_did_you_hear_about_us'] == 'Article') {
+            customerRecord.setFieldValue('custentity_how_did_you_hear_about_us', 2);
+        } else if (parsedMainData['how_did_you_hear_about_us'] == 'Word of Mouth') {
+            customerRecord.setFieldValue('custentity_how_did_you_hear_about_us', 3);
+        } else if (parsedMainData['how_did_you_hear_about_us'] == 'Search Engine (e.g. Google)') {
+            customerRecord.setFieldValue('custentity_how_did_you_hear_about_us', 4);
+        } else if (parsedMainData['how_did_you_hear_about_us'] == 'Online Forum') {
+            customerRecord.setFieldValue('custentity_how_did_you_hear_about_us', 5);
+        } else {
+            customerRecord.setFieldValue('custentity_how_did_you_hear_about_us', 6);
+        }
+
+        
+
+        //ADDRESS
+        customerRecord.selectNewLineItem('addressbook');
+        customerRecord.setCurrentLineItemValue('addressbook', 'country', 'AU');
+        customerRecord.setCurrentLineItemValue('addressbook', 'zip', parsedMainData['postcode']);
+        customerRecord.commitLineItem('addressbook');
 
         var customerRecordId = nlapiSubmitRecord(customerRecord);
 
@@ -158,7 +180,7 @@ function createLead(data) {
             nlapiSubmitRecord(salesRecord);
         }
 
-         //Send Email to Customer who filled out the Landing Page Form
+        //Send Email to Customer who filled out the Landing Page Form
         var url = 'https://1048144.extforms.netsuite.com/app/site/hosting/scriptlet.nl?script=395&deploy=1&compid=1048144&h=6d4293eecb3cb3f4353e&rectype=customer&template=';
         var template_id = 94;
         var newLeadEmailTemplateRecord = nlapiLoadRecord('customrecord_camp_comm_template', template_id);
