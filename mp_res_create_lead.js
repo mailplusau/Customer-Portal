@@ -107,7 +107,7 @@ function createLead(data) {
                     nlapiSubmitRecord(contactRecord);
 
                     //USER NOTE
-                    if (!isNullorEmpty(data[fieldname][x]['comments'])) {
+                    if (!isNullorEmpty(data[fieldname][x]['comments']) || data[fieldname][x]['comments'] != 'N/A') {
                         var userNoteRecord = nlapiCreateRecord('note');
                         userNoteRecord.setFieldValue('title', 'Portal');
                         userNoteRecord.setFieldValue('entity', customerRecordId);
@@ -150,6 +150,10 @@ function createLead(data) {
                             case 'TAS':
                                 salesRep = 765724; //Niz Ali
                                 to = ['niz.ali@mailplus.com.au']
+                                break;
+                            case 'WA':
+                                salesRep = 668711; //Lee Russell
+                                to = ['lee.russell@mailplus.com.au']
                                 break;
                             default:
                                 salesRep = 668712; //Belinda Urbani

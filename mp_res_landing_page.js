@@ -7,7 +7,7 @@
  * Description: Create Leads on NetSuite coming from the Landing Page on Unbounce.       
  * 
  * @Last Modified by:   ankit
- * @Last Modified time: 2020-09-08 08:42:31
+ * @Last Modified time: 2020-09-14 14:08:20
  *
  */
 
@@ -157,7 +157,7 @@ function createLead(data) {
             if (postcode >= 3000 && postcode <= 3999) { //VIC Postcodes
                 var salesRep = 690145; //David Gdanski
                 to = ['david.gdanski@mailplus.com.au']
-            } else if ((postcode >= 4000 && postcode <= 4999) || (postcode >= 800 && postcode <= 999)) { //QLD & NT Postcodes
+            } else if ((postcode >= 4000 && postcode <= 4999) || (postcode >= 800 && postcode <= 999) || (postcode >= 6000 && postcode <= 6999)) { //QLD & NT Postcodes
                 var salesRep = 668711; //Lee Russell
                 to = ['lee.russell@mailplus.com.au']
             } else if (postcode >= 7000 && postcode <= 7999) { //TAS Postcodes
