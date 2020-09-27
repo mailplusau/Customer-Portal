@@ -7,7 +7,7 @@
  * Description: Create Leads on NetSuite coming from the Landing Page on Unbounce.       
  * 
  * @Last Modified by:   ankit
- * @Last Modified time: 2020-09-14 14:08:20
+ * @Last Modified time: 2020-09-24 12:12:45
  *
  */
 
@@ -84,7 +84,7 @@ function createLead(data) {
             customerRecord.setFieldValue('custentity_how_did_you_hear_about_us', 6);
         }
 
-        
+
 
         //ADDRESS
         customerRecord.selectNewLineItem('addressbook');
@@ -126,8 +126,13 @@ function createLead(data) {
         //ACT & NSW Postcodes
         if (postcode >= 2000 && postcode <= 2999) {
             var postcode = parseInt(parsedMainData['postcode']);
-            //ACT Post Codes
-            if ((postcode >= 2600 && postcode <= 2618) || (postcode >= 2900 && postcode <= 2920)) {
+            //Byron Bay Postcodes
+            if (postcode == 2481 || postcode == 2482) {
+                to = ['niz.ali@mailplus.com.au', 'lee.russell@mailplus.com.au'];
+                body = 'Dear Lee & Niz, \n \nA HOT Lead has been entered into the System. Please create a Sales Record to assign it to yourself. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
+                nlapiSendEmail(from, to, subject, body, cc);
+            } else if ((postcode >= 2600 && postcode <= 2618) || (postcode >= 2900 && postcode <= 2920)) {
+                //ACT Post Codes
                 var salesRecord = nlapiCreateRecord('customrecord_sales');
                 var salesRep = 696160; //Kerina Helliwell
                 to = ['kerina.helliwell@mailplus.com.au'];
@@ -145,7 +150,6 @@ function createLead(data) {
             } else {
                 //NSW Postcodes
                 to = ['niz.ali@mailplus.com.au', 'kerina.helliwell@mailplus.com.au'];
-                //to = ['gaelle.greiveldinger@mailplus.com.au'];
                 body = 'Dear Kerina & Niz, \n \nA HOT Lead has been entered into the System. Please create a Sales Record to assign it to yourself. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
                 nlapiSendEmail(from, to, subject, body, cc);
             }
