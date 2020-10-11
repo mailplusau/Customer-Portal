@@ -131,10 +131,28 @@ function createLead(data) {
                     var body = 'New sales record has been created. \n A HOT Lead has been entered into the System. Please respond in an hour. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
 
                     if (formatStateName(data[fieldname][x]['state']) == 'NSW') {
-                        to = ['niz.ali@mailplus.com.au', 'kerina.helliwell@mailplus.com.au'];
-                        //to = ['gaelle.greiveldinger@mailplus.com.au'];
-                        body = 'Dear Kerina & Niz, \n \nA HOT Lead has been entered into the System. Please create a Sales Record to assign it to yourself. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
-                        nlapiSendEmail(from, to, subject, body, cc);
+                        if (data[fieldname][x]['zip'] == "2481" || data[fieldname][x]['zip'] == "2482") {
+                            var salesRecord = nlapiCreateRecord('customrecord_sales');
+                            var salesRep;
+                            salesRep = 668711; //Lee Russell
+                            to = ['lee.russell@mailplus.com.au'];
+                            nlapiSendEmail(from, to, subject, body, cc);
+                            salesRecord.setFieldValue('custrecord_sales_customer', customerRecordId);
+                            salesRecord.setFieldValue('custrecord_sales_campaign', 62); //Field Sales
+                            salesRecord.setFieldValue('custrecord_sales_assigned', salesRep);
+                            salesRecord.setFieldValue('custrecord_sales_outcome', 5);
+                            salesRecord.setFieldValue('custrecord_sales_callbackdate', getDate());
+                            var date = new Date();
+                            salesRecord.setFieldValue('custrecord_sales_callbacktime', nlapiDateToString(date, 'timeofday'));
+                            nlapiSubmitRecord(salesRecord);
+                        } else {
+                            to = ['niz.ali@mailplus.com.au', 'kerina.helliwell@mailplus.com.au'];
+                            //to = ['gaelle.greiveldinger@mailplus.com.au'];
+                            body = 'Dear Kerina & Niz, \n \nA HOT Lead has been entered into the System. Please create a Sales Record to assign it to yourself. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
+                            nlapiSendEmail(from, to, subject, body, cc);
+                        }
+
+
                     } else {
                         var salesRecord = nlapiCreateRecord('customrecord_sales');
                         var salesRep;
@@ -153,7 +171,7 @@ function createLead(data) {
                                 break;
                             case 'WA':
                                 salesRep = 668711; //Lee Russell
-                                to = ['lee.russell@mailplus.com.au']
+                                to = ['lee.russell@mailplus.com.au', 'kerina.helliwell@mailplus.com.au']
                                 break;
                             default:
                                 salesRep = 668712; //Belinda Urbani

@@ -7,7 +7,7 @@
  * Description: Create Leads on NetSuite coming from the Landing Page on Unbounce.       
  * 
  * @Last Modified by:   ankit
- * @Last Modified time: 2020-09-24 12:12:45
+ * @Last Modified time: 2020-10-12 10:24:07
  *
  */
 
@@ -128,9 +128,20 @@ function createLead(data) {
             var postcode = parseInt(parsedMainData['postcode']);
             //Byron Bay Postcodes
             if (postcode == 2481 || postcode == 2482) {
-                to = ['niz.ali@mailplus.com.au', 'lee.russell@mailplus.com.au'];
-                body = 'Dear Lee & Niz, \n \nA HOT Lead has been entered into the System. Please create a Sales Record to assign it to yourself. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
+                to = ['lee.russell@mailplus.com.au'];
+                body = 'Hi Lee, \n \nA HOT Lead has been entered into the System.\n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
                 nlapiSendEmail(from, to, subject, body, cc);
+                var salesRecord = nlapiCreateRecord('customrecord_sales');
+                var salesRep = 668711; //Lee Russell
+
+                salesRecord.setFieldValue('custrecord_sales_customer', customerRecordId);
+                salesRecord.setFieldValue('custrecord_sales_campaign', 62); //Field Sales
+                salesRecord.setFieldValue('custrecord_sales_assigned', salesRep);
+                salesRecord.setFieldValue('custrecord_sales_outcome', 5);
+                salesRecord.setFieldValue('custrecord_sales_callbackdate', getDate());
+                var date = new Date();
+                salesRecord.setFieldValue('custrecord_sales_callbacktime', nlapiDateToString(date, 'timeofday'));
+                nlapiSubmitRecord(salesRecord);
             } else if ((postcode >= 2600 && postcode <= 2618) || (postcode >= 2900 && postcode <= 2920)) {
                 //ACT Post Codes
                 var salesRecord = nlapiCreateRecord('customrecord_sales');
@@ -167,6 +178,10 @@ function createLead(data) {
             } else if (postcode >= 7000 && postcode <= 7999) { //TAS Postcodes
                 var salesRep = 765724; //Niz Ali
                 to = ['niz.ali@mailplus.com.au']
+            } else if (postcode >= 6000 && postcode <= 6999) {
+                to = ['lee.russell@mailplus.com.au', 'kerina.helliwell@mailplus.com.au'];
+                body = 'Dear Kerina & Lee, \n \nA HOT Lead has been entered into the System. Please create a Sales Record to assign it to yourself. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
+                nlapiSendEmail(from, to, subject, body, cc);
             } else { //Everything else
                 var salesRep = 668712; //Belinda Urbani
                 to = ['belinda.urbani@mailplus.com.au'];
