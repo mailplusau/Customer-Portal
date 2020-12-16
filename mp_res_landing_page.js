@@ -7,7 +7,7 @@
  * Description: Create Leads on NetSuite coming from the Landing Page on Unbounce.       
  * 
  * @Last Modified by:   ankit
- * @Last Modified time: 2020-10-13 09:10:03
+ * @Last Modified time: 2020-11-30 10:59:55
  *
  */
 
@@ -50,7 +50,7 @@ function createLead(data) {
         customerRecord.setFieldValue('phone', parsedMainData['phone_number']);
 
         var quadient = parsedMainData['business_name'].substring(0, 10);
-        nlapiLogExecution('DEBUG', 'quadient', quadient);
+        nlapiLogExecution('DEBUG', 'business_name', parsedMainData['business_name']);
         if (quadient == 'Quadient -') {
             customerRecord.setFieldValue('leadsource', 246616); //Quadient
         } else {
@@ -59,6 +59,8 @@ function createLead(data) {
                 customerRecord.setFieldValue('leadsource', 249135); //Inbound - Landing Page
             } else if(parsedMainData['page_url'] == "http://mailplus.com.au/shopify/"){
                 customerRecord.setFieldValue('leadsource', 250768); //Inbound - Shopify 
+            } else if(parsedMainData['page_url'] == "http://mailplus.com.au/mailplus-auspost/"){
+                customerRecord.setFieldValue('leadsource', 251702);
             }
         }
         customerRecord.setFieldValue('entitystatus', 57); //Suspect - Hot Lead
