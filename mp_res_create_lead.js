@@ -146,10 +146,19 @@ function createLead(data) {
                             salesRecord.setFieldValue('custrecord_sales_callbacktime', nlapiDateToString(date, 'timeofday'));
                             nlapiSubmitRecord(salesRecord);
                         } else {
-                            to = ['niz.ali@mailplus.com.au', 'kerina.helliwell@mailplus.com.au'];
+                            to = ['kerina.helliwell@mailplus.com.au'];
                             //to = ['gaelle.greiveldinger@mailplus.com.au'];
-                            body = 'Dear Kerina & Niz, \n \nA HOT Lead has been entered into the System. Please create a Sales Record to assign it to yourself. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
+                            body = 'Dear Kerina, \n \nA HOT Lead has been entered into the System. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
                             nlapiSendEmail(from, to, subject, body, cc);
+
+                            salesRecord.setFieldValue('custrecord_sales_customer', customerRecordId);
+                            salesRecord.setFieldValue('custrecord_sales_campaign', 62); //Field Sales
+                            salesRecord.setFieldValue('custrecord_sales_assigned', 696160);
+                            salesRecord.setFieldValue('custrecord_sales_outcome', 5);
+                            salesRecord.setFieldValue('custrecord_sales_callbackdate', getDate());
+                            var date = new Date();
+                            salesRecord.setFieldValue('custrecord_sales_callbacktime', nlapiDateToString(date, 'timeofday'));
+                            nlapiSubmitRecord(salesRecord);
                         }
 
 

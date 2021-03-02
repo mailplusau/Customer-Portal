@@ -7,7 +7,7 @@
  * Description: Create Leads on NetSuite coming from the Landing Page on Unbounce.       
  * 
  * @Last Modified by:   ankit
- * @Last Modified time: 2020-11-30 10:59:55
+ * @Last Modified time: 2021-02-18 14:42:13
  *
  */
 
@@ -147,7 +147,7 @@ function createLead(data) {
                 var date = new Date();
                 salesRecord.setFieldValue('custrecord_sales_callbacktime', nlapiDateToString(date, 'timeofday'));
                 nlapiSubmitRecord(salesRecord);
-            } else if ((postcode >= 2600 && postcode <= 2618) || (postcode >= 2900 && postcode <= 2920)) {
+            } else {
                 //ACT Post Codes
                 var salesRecord = nlapiCreateRecord('customrecord_sales');
                 var salesRep = 696160; //Kerina Helliwell
@@ -163,11 +163,6 @@ function createLead(data) {
                 salesRecord.setFieldValue('custrecord_sales_callbacktime', nlapiDateToString(date, 'timeofday'));
                 nlapiSubmitRecord(salesRecord);
 
-            } else {
-                //NSW Postcodes
-                to = ['niz.ali@mailplus.com.au', 'kerina.helliwell@mailplus.com.au'];
-                body = 'Dear Kerina & Niz, \n \nA HOT Lead has been entered into the System. Please create a Sales Record to assign it to yourself. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
-                nlapiSendEmail(from, to, subject, body, cc);
             }
 
         } else { //Everything else
