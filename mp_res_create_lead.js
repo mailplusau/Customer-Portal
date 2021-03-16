@@ -146,6 +146,7 @@ function createLead(data) {
                             salesRecord.setFieldValue('custrecord_sales_callbacktime', nlapiDateToString(date, 'timeofday'));
                             nlapiSubmitRecord(salesRecord);
                         } else {
+                            var salesRecord = nlapiCreateRecord('customrecord_sales');
                             to = ['kerina.helliwell@mailplus.com.au'];
                             //to = ['gaelle.greiveldinger@mailplus.com.au'];
                             body = 'Dear Kerina, \n \nA HOT Lead has been entered into the System. \n Customer Name: ' + entity_id + ' ' + customer_name + '\nLink: ' + cust_id_link;
