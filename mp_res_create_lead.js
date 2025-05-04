@@ -201,7 +201,7 @@ function createLead(data) {
                     dataOut += '{"ns_id":"' + customerRecordId + '"},';
 
                     //Send Email to Customer who filled out the Sign Up Form
-                    var url = 'https://1048144.extforms.netsuite.com/app/site/hosting/scriptlet.nl?script=395&deploy=1&compid=1048144&h=6d4293eecb3cb3f4353e&rectype=customer&template=';
+                    var url = 'https://1048144.extforms.netsuite.com/app/site/hosting/scriptlet.nl?script=395&deploy=1&compid=1048144&ns-at=AAEJ7tMQgAVHkxJsbXgGwQQm4xn968o7JJ9-Ym7oanOzCSkWO78&rectype=customer&template=';
                     var template_id = 94;
                     var newLeadEmailTemplateRecord = nlapiLoadRecord('customrecord_camp_comm_template', template_id);
                     var templateSubject = newLeadEmailTemplateRecord.getFieldValue('custrecord_camp_comm_subject');
